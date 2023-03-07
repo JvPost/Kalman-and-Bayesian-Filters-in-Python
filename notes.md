@@ -1,73 +1,104 @@
-Filter (signal processing)
+# Filter (signal processing)
 
-a device or process that removes some unwanted components or features from a signal. Filtering is a class of signal processing, the defining feature of filters being the complete or partial suppression of some aspect of the signal. 
+A device or process that removes some unwanted components or features from a signal. Filtering is a class of signal processing, the defining feature of filters being the complete or partial suppression of some aspect of the signal. From [Filter (signal processing) - Wikipedia](https://en.wikipedia.org/wiki/Filter_(signal_processing))
 
 # Kalman & Bayesian Filters in Python Book Notes
 
 Key points
 
 - Multiple data points are more accurate than one data point, so throw nothing away no matter how inaccurate it is;
-- always choose a number part way bewteen two data points to create a more accurate estimate;
-- predict the next measurement and rate of change based on the current estimate and how much we think it will change
+- always choose a number part way between two data points to create a more accurate estimate;
+- predict the next measurement and rate of change based on the current estimate and how much we think it will change;
 - the new estimate is then chosen as part way between the prediction and next measurement scaled by how much credence we give them.
 
 Therefore, filtering is always a compromise between a(n) (informed) prediction and a (noisy) measurement, that will hopefully increase in accuracy over time, as we get more data.
 
-Terminology & examples
+## Terminology & examples
 
-System: an object we want to estimate. In some texts it's called a plant, which is combination of a process and an actuator, e.g. a scale.
-Process: series of interrelated tasks that, together, transform inputs into a given output e.g. transforming gravity force on a scale to a number.
-State: the current configuration or values of the system that we are interested in e.g., the weight on the scale.
-Measurement: the measured value of the system e.g. the number on the scale.
-State estimate: filter's estimate of the state e.g., of a scale.
+**System**: an object we want to estimate. In some texts it's called a [Plant (control theory) - Wikipedia](https://en.wikipedia.org/wiki/Plant_(control_theory)), which is combination of a process and an actuator, e.g. a scale. 
+**Process**: series of interrelated tasks that, together, transform inputs into a given output e.g. transforming gravity force on a scale to a number.
+**State**: the current configuration or values of the system that we are interested in e.g., the weight on the scale.
+**Measurement**: the measured value of the system e.g. the number on the scale.
+**State estimate**: filter's estimate of the state e.g., of a scale.
 
-In other words: the state should be unerstood as the actual value of the system. This value is usually hidden to us. If I stapped on a scale you'd then have a measurement. We cal this observable since you can directly observe this measurement. In contrast, you can never directly observe my weight, you can only measure it. Any estimation problem consists of forming an estimate of a hidden state via observable measurements. 
+**In other words**: the state should be unerstood as the actual value of the system. This value is usually hidden to us. If I step on a scale you'd have a measurement. We cal; this observable since you can directly observe this measurement. In contrast, you can never directly observe my weight, you can only measure it. Any estimation problem consists of forming an estimate of a hidden state via observable measurements. 
 
-Process model: the mathematical model of the system, e.g., for a moving car the process model of the distance is: the distance at last measured timestep, plus velocity times time since that last timestep. This process model is not perfect as the velocity of a car can vary over a non-zero amount of time, the tires can slip on the road etc. 
-Prediction: using a process model, we try to predict the current state, e.g. we try to predict the position of a car.
-System error or Process error is the error in the model, e.g., the error caused by the process model's imperfections, i.e., the difference between the predicted position of the car and the actual position of the car.
-System propagation: The prediction step. We use the process model to make a new state estimate. Because of the system error the estimate is imperfect. 
-Epoch: one iteration of system propagation.
+**Process model**: the mathematical model of the system, e.g., for a moving car the process model of the distance is: the distance at last measured timestep, plus velocity times time since that last timestep. This process model is not perfect as the velocity of a car can vary over a non-zero amount of time, the tires can slip on the road etc. 
+**Prediction**: using a process model, we try to predict the current state, e.g. we try to predict the position of a car.
+**System error** or **Process error** is the error in the model, e.g., the error caused by the process model's imperfections, i.e., the difference between the predicted position of the car and the actual position of the car.
+**System propagation**: The prediction step. We use the process model to make a new state estimate. Because of the system error the estimate is imperfect. 
+**Epoch**: one iteration of system propagation.
 
 Say we want to predict the position of the train. Then, we have to take into account certain assumptions such as how much a train can slow down within a certain time frame and the system errors. These assumptions must be encoded in the credence we give prediction and the measurement. Then, the estimate is somewhere in between the prediction and measurement proportional to the credence we give them both. This can be a position in an n-dimensional space. The examples above, of the trian and scale are 1 dimensional.
 
-Algorithm
+## Algorithm
 
-Initialization
+**Initialization**
 
 1. Initialize the state of the filter
 2. Initialize our belief in the state
-   Predict
-3. Use system behaviour the predict the state at the next time step
-4. Adjes belief to account for the uncertainty in prediction`
-   Update
-5. Get a measurement and associated belief about its accuracy
-6. Compute residual between estimated state and measurement
-7. New estimate is somewhere on the residual (line between measurement and estimate)
 
-g-h filter
+**Predict**
 
-estimate = prediction + g*residual
-new gain = old gain + h * 1/dt * residual
+1. Use system behaviour the predict the state at the next time step
+2. Adjust belief to account for the uncertainty in prediction
+
+**Update**
+
+1. Get a measurement and associated belief about its accuracy
+2. Compute residual between estimated state and measurement
+3. New estimate is somewhere on the residual (line between measurement and estimate)
+
+# g-h filter
+
+$\text{estimate} = \text{prediction} + g \cdot \text{residual}$
+$\text{new gain} = \text{old gain} + h \frac{1}{dt} \cdot \text{residual}$
 
 where 
 
-- residual  = measurement - prediction;
-- prediction = last estimate + gain * dt;
-- g describes how sure we are about the measurement, i.e. how much we want to fit the measurement error (residual), or how accurate we predict the measurement to be. The more sure we are about the measurement (residual \approx 0), the higher g should be.
-- hdecribes the prediction of how fast dxchanges over time.
+- $\text{residual}  = \text{measurement} - \text{prediction}$
+- $\text{prediction} = \text{last estimate} + \text{gain} \cdot dt$
+- $g$ describes how sure we are about the measurement, i.e. how much we want to fit the measurement error (residual), or how accurate we predict the measurement to be. The more sure we are about the measurement ($\text{residual} \approx 0$), the higher $g $should be.
+- $h$ decribes the prediction of how fast the system exchanges over time.
 
-Kalman filter
+# 1D Kalman filter
 
-We learned that the sum of 2 gaussians is:
+We learned that the **sum of two gaussians is**:
 
-and the product of 2 gaussians is
+$$
+\mathcal{N}(\mu_1, \sigma_1^2) + \mathcal{N}(\mu_2, \sigma_2^2) = \\
+\mathcal{N}(\mu_1 + \mu_2, \sigma_1^2 + \sigma_2^2)
+$$
+
+We use this for predictions, as prediction are simply linear operations
+
+and the **product of 2 gaussians** is:
+
+$$
+\mathcal{N}(\mu_1, \sigma_1^2) \cdot \mathcal{N}(\mu_2, \sigma_2^2) = \\
+\mathcal{N}\left( \frac{\sigma_1^2\mu_2 + \sigma_2^2\mu_1}{\sigma_1^2 + \sigma_2^2},
+\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2 + \sigma_2^2}
+  \right)
+$$
 
 and we know that the posterior is:
 
+$\text{posterior} = \frac{\text{likelihood} \cdot \text{prior}}{\text{marginal}}$
+
+Therefore the update step is simply 
+
+$$
+\mathcal{N}(\bar\mu, \bar\sigma^2) \cdot \mathcal{N}(\mu_z, \sigma_z^2) = \\
+\mathcal{N}\left( \frac{\bar\sigma^2\mu_z + \sigma_z^2\bar\mu_1}{\bar\sigma^2 + \sigma_z^2},
+\frac{\bar\sigma^2\sigma_z^2}{\bar\sigma^2 + \sigma_z^2}
+  \right)
+$$
+
+where $\bar\mu$ and $\bar\sigma^2$ denote prior parameters and $\mu_z$ and $\sigma^2_z$ denote measurement model parameters. Remember, both the prior and measurement have noise. Then in the subsequent steps the posterior becomes the new prior. 
+
 As long as everything is gaussian we can use measurements and predictions to update the Kalman filter:
 
-```
+```python
 import kf_book.kf_internal as kf_internal
 from kf_book.kf_internal import DogSimulation
 
@@ -90,11 +121,6 @@ dog = DogSimulation(
 
 # create list of measurements
 zs = [dog.move_and_sense() for _ in range(10)]
-```
-
-```
-print('PREDICT\t\t\tUPDATE')
-print('     x      var\t\t  z\t    x      var')
 
 # perform Kalman filter on measurement z
 for z in zs:    
@@ -111,9 +137,21 @@ print(f'actual final position: {dog.x:10.3f}')
 
 For each iteration of the loop we forma prior, take a measurement, form a likelihood from the measurement, and then incorporate the likelihood into the prior.
 
-KF algorithm
+## Kalman gain derivation
 
-```
+<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-38-48-image.png" title="" alt="" width="443">
+
+where $\mu^*$ is the posterior mean and $K=\frac{\bar\sigma^2}{\bar\sigma^2 + \sigma_z^2}$ is called **Kalman gain**
+
+<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-42-00-image.png" title="" alt="" width="375">
+
+The posterior variance ${\sigma^2}^*$ can also be defined in terms of $K$:
+
+<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-46-23-image.png" title="" alt="" width="323">
+
+## KF algorithm
+
+```python
 def update(prior, measurement):
     x, P = prior        # mean and variance of prior
     z, R = measurement  # mean and variance of measurement
@@ -133,27 +171,37 @@ def predict(posterior, movement):
     return gaussian(x, P)
 ```
 
-$R$ is measurement noise
-$Q$ is process noise
-$P$ is state variance
-$z$ is measurement.
+$R$ is measurement noise: $\sigma^2_z
+$
+
+$Q$ is process noise: $\bar\sigma^2 + \sigma_z^2$
+
+$P$ is state variance: $\bar\sigma^2$
+$z$ is measurement: $z \sim \mathcal{N}(\mu_z, \sigma_z^2)$
+
 Kalman gain $K = P/(P+R)$
 
-Initialization
+**Initialization**
 
 1. Initialize the state of the filter
 2. Initialize our belief in the state
-   Predict
-3. use system behavior to predict state at the net time step
-4. Adjust belief to account for the uncertainty in prediction
-   Update
-5. Get a measruement and associated belief about its accuracy
-6. COmpute residual between estimated state and measurement
-7. COmpute scaling factor based on whether the measurement or prediction is more accuracte
-8. set state between the prediction and measurement based on scaling factor
-9. update belief in the state based on how certain we are in the measurement.
 
-**Equations**
+**Predict**
+
+1. use system behavior to predict state at the net time step
+2. Adjust belief to account for the uncertainty in prediction
+
+**Update**
+
+1. Get a measurement and associated belief about its accuracy
+2. Compute residual between estimated state and measurement
+3. Compute scaling factor based on whether the measurement or prediction is more accuracte
+4. Set state between the prediction and measurement based on scaling factor
+5. Update belief in the state based on how certain we are in the measurement.
+
+## Equations
+
+**<u>Predict</u>**
 
 $$
 \begin{array}{|l|l|l|}
@@ -166,7 +214,7 @@ $$
 \end{array}
 $$
 
-**Update**
+**<u>Update</u>**
 
 $$
 \begin{array}{|l|l|l|}
@@ -181,7 +229,219 @@ $$
 \end{array}
 $$
 
+# n-D Kalman filter
+
+The algorithm stays the same, we just add more dimensions now.
+
+<u>**Predict**</u>
+
+$$
+\begin{array}{|l|l|l|}
+\hline
+\text{Univariate} & \text{Univariate} & \text{Multivariate}\\
+& \text{(Kalman form)} & \\
+\hline
+\bar \mu = \mu + \mu_{f_x} & \bar x = x + dx & \bar{\mathbf x} = \mathbf{Fx} + \mathbf{Bu}\\
+\bar\sigma^2 = \sigma_x^2 + \sigma_{f_x}^2 & \bar P = P + Q & \bar{\mathbf P} = \mathbf{FPF}^\mathsf T + \mathbf Q \\
+\hline
+\end{array}
+$$
+
+$\mathbf x,\, \mathbf P$ are the state mean and covariance. They correspond to $x$ and $\sigma^2$.
+
+$\mathbf F$ is the *state transition function*. When multiplied by $\bf x$ it computes the prior.
+
+$\mathbf Q$ is the process covariance. It corresponds to $\sigma^2_{f_x}$.
+
+$\mathbf B$ and $\mathbf u$ are new to us. They let us model control inputs to the system.
+
+<u>**Update**</u>
+
+$$
+\begin{array}{|l|l|l|}
+\hline
+\text{Univariate} & \text{Univariate} & \text{Multivariate}\\
+& \text{(Kalman form)} & \\
+\hline
+& y = z - \bar x & \mathbf y = \mathbf z - \mathbf{H\bar x} \\
+& K = \frac{\bar P}{\bar P+R}&
+\mathbf K = \mathbf{\bar{P}H}^\mathsf T (\mathbf{H\bar{P}H}^\mathsf T + \mathbf R)^{-1} \\
+\mu=\frac{\bar\sigma^2\, \mu_z + \sigma_z^2 \, \bar\mu} {\bar\sigma^2 + \sigma_z^2} & x = \bar x + Ky & \mathbf x = \bar{\mathbf x} + \mathbf{Ky} \\
+\sigma^2 = \frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2} & P = (1-K)\bar P &
+\mathbf P = (\mathbf I - \mathbf{KH})\mathbf{\bar{P}} \\
+\hline
+\end{array}
+$$
+
+$\mathbf H$ is the measurement function. We haven't seen this yet in this book and I'll explain it later. If you mentally remove $\mathbf H$ from the equations, you should be able to see these equations are similar as well.
+
+$\mathbf z,\, \mathbf R$ are the measurement mean and noise covariance. They correspond to $z$ and $\sigma_z^2$ in the univariate filter (I've substituted $\mu$ with $x$ for the univariate equations to make the notation as similar as possible).
+
+$\mathbf y$ and $\mathbf K$ are the residual and Kalman gain.
+
+Our job is to design a state $(\mathbf{x}, \mathbf{P})$, the process $(\mathbf{F}, \mathbf{Q})$, the measurement $(\mathbf{z}, \mathbf{R})$, and the measurement function $\mathbf{H}$. If the system has control inputs, such as a robot, you will also design $\mathbf{B}$ and $\mathbf{u}$.
+
+**Observed variables**: directly measured by sensors, e.g., position
+
+**Hidden variable**: inferred from the from the <u>observed variables</u>, e.g., velocity and accelaration
+
+## Prediction
+
+### Design state covariance
+
+**State covariance** $\mathbf{P}$ is simply the variance of every observed and/or hidden variables, over de diagional of a squared matrix. The non diagonal parts are the covariances.
+
+### Design process model
+
+**Example** system of moving object with constant velocity, then we try to find the <u>state transition matrix \ state transition function </u> $\mathbf{F}$.
+
+$$
+\bar x = x + \dot x\Delta t \\
+\bar{\dot x}  = \dot x \\
+\mathbf{x} = (x, \dot x)^\text{T}
+$$
+
+then the process model can be found by creating a system of linear equations:
+
+$$
+\begin{cases}
+\begin{aligned}
+\bar x &= x + \dot x \Delta t \\
+\bar{\dot x} &= \dot x
+\end{aligned}
+\end{cases}
+$$
+
+$$
+\begin{cases}
+\begin{aligned}
+\bar x &= 1x + &\Delta t\, \dot x \\
+\bar{\dot x} &=0x + &1\, \dot x
+\end{aligned}
+\end{cases}
+$$
+
+$$
+\begin{aligned}
+\begin{bmatrix}\bar x \\ \bar{\dot x}\end{bmatrix} &= \begin{bmatrix}1&\Delta t  \\ 0&1\end{bmatrix}  \begin{bmatrix}x \\ \dot x\end{bmatrix}\\
+\mathbf{\bar x} &= \mathbf{Fx}
+\end{aligned}
+$$
+
+### Predict
+
+We have now found the state covariance $\mathbf{P}$ and state transition matrix $\mathbf{F}$. Assuming no process noise and control functions by setting $\mathbf{Q}=0$ and $\mathbf{u}=0$, respectively. We can now make a predict step using the equations from above:
+
+$$
+\mathbf{\bar x = Fx} \\
+\mathbf{\bar P = FPF}^\mathsf{T}
+
+$$
+
+### Design Process Noise
+
+Random forces can influance a system, we can model this for example by adding white noise:
+
+$$
+\mathbf{\dot x = }f(\mathbf{x}) + w
+$$
+
+where $w \sim \mathcal N(0, \sigma_w^2)$
+
+### Design the Control function
+
+$$
+\Delta\mathbf x = \mathbf{Bu}
+$$
+
+Here $\mathbf{u}$ is the <u>control input</u> and $\mathbf{B}$ is the <u>control model</u>.
+
+### Summary
+
+Therefore, to make a prediction we have to specify
+
+$\mathbf{x, P}$: the state an covariance
+
+$\mathbf{F, Q}$: the process model and noise covariance
+
+$\mathbf{B, u}$: optionally, the control input and function
+
+## Update Step
+
+### Design the measurement function
+
+The measurement function $\mathbf{H}$ transforms state into measurement, i.e. temperature into volts. Then, we calculate the residual by:
+
+$$
+\mathbf y = \mathbf z - \mathbf{H \bar x}
+$$
+
+where $\mathbf y$ is the residual, $\mathbf{\bar x}$ is the prior, $\mathbf z$ is the measurement, and $\mathbf H$ is the measurement function. 
+
+### Design the measurement
+
+$$
+\mathbf z = \begin{bmatrix}z_1 \\ z_2\end{bmatrix}
+$$
+
+$$
+\mathbf R = \begin{bmatrix} \sigma_{z_1}^2 & 0 \\ 0 & \sigma_{z_2}^2 \end{bmatrix}
+$$
 
 
 
+## Kalman filter Equations
 
+### Predicion equations
+
+Simply as described above.
+
+The algorithm stays the same, we just add more dimensions now.
+
+<u><strong>Predict</strong></u>
+
+$$
+\begin{array}{|l|l|l|}
+\hline
+\text{Univariate} & \text{Univariate} & \text{Multivariate}\\
+& \text{(Kalman form)} & \\
+\hline
+\bar \mu = \mu + \mu_{f_x} & \bar x = x + dx & \bar{\mathbf x} = \mathbf{Fx} + \mathbf{Bu}\\
+\bar\sigma^2 = \sigma_x^2 + \sigma_{f_x}^2 & \bar P = P + Q & \bar{\mathbf P} = \mathbf{FPF}^\mathsf T + \mathbf Q \\
+\hline
+\end{array}
+$$
+
+$\mathbf x$,  $\mathbf P$ are the state mean and covariance. They correspond to $x$ and $\sigma^2$.
+
+$\mathbf F$ is the *state transition function*. When multiplied by $\mathbf x$ it computes the prior.
+
+$\mathbf Q$ is the process covariance. It corresponds to $\sigma^2_{f_x}$.
+
+$\mathbf B$ and $\mathbf u$ let us model control inputs to the system.
+
+<u><strong>Update</strong></u>
+
+$$
+\begin{array}{|l|l|l|}
+\hline
+\text{Univariate} & \text{Univariate} & \text{Multivariate}\\
+& \text{(Kalman form)} & \\
+\hline
+& y = z - \bar x & \mathbf y = \mathbf z - \mathbf{H\bar x} \\
+& K = \frac{\bar P}{\bar P+R}&
+\mathbf K = \mathbf{\bar{P}H}^\mathsf T (\mathbf{H\bar{P}H}^\mathsf T + \mathbf R)^{-1} \\
+\mu=\frac{\bar\sigma^2\, \mu_z + \sigma_z^2 \, \bar\mu} {\bar\sigma^2 + \sigma_z^2} & x = \bar x + Ky & \mathbf x = \bar{\mathbf x} + \mathbf{Ky} \\
+\sigma^2 = \frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2} & P = (1-K)\bar P &
+\mathbf P = (\mathbf I - \mathbf{KH})\mathbf{\bar{P}} \\
+\hline
+\end{array}
+$$
+
+$\mathbf H$ is the measurement function. We haven't seen this yet in this book and I'll explain it later. If you mentally remove $\mathbf H $ from the equations, you should be able to see these equations are similar as well.
+
+$\mathbf z,\, \mathbf R$ are the measurement mean and noise covariance. They correspond to $z$ and $\sigma_z^2$ in the univariate filter (I've substituted $\mu$ with $x$ for the univariate equations to make the notation as similar as possible).
+
+$\mathbf y$ and $\mathbf K$ are the residual and Kalman gain.
+
+Our job is to design a state ($\mathbf{x}, \mathbf{P}$), the process ($\mathbf{F}, \mathbf{Q}$), the measurement ($\mathbf{z}, \mathbf{R}$), and the measurement function $\mathbf{H}$. If the system has control inputs, such as a robot, you will also design $\mathbf{B}$ and $\mathbf{u}$.
