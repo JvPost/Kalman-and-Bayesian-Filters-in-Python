@@ -21,7 +21,7 @@ Therefore, filtering is always a compromise between a(n) (informed) prediction a
 **Measurement**: the measured value of the system e.g. the number on the scale.
 **State estimate**: filter's estimate of the state e.g., of a scale.
 
-**In other words**: the state should be unerstood as the actual value of the system. This value is usually hidden to us. If I step on a scale you'd have a measurement. We cal; this observable since you can directly observe this measurement. In contrast, you can never directly observe my weight, you can only measure it. Any estimation problem consists of forming an estimate of a hidden state via observable measurements. 
+**In other words**: the state should be understood as the actual value of the system. This value is usually hidden to us. If I step on a scale you'd have a measurement. We call this observable since you can directly observe this measurement. In contrast, you can never directly observe my weight, you can only measure it. Any estimation problem consists of forming an estimate of a hidden state via observable measurements. 
 
 **Process model**: the mathematical model of the system, e.g., for a moving car the process model of the distance is: the distance at last measured timestep, plus velocity times time since that last timestep. This process model is not perfect as the velocity of a car can vary over a non-zero amount of time, the tires can slip on the road etc. 
 **Prediction**: using a process model, we try to predict the current state, e.g. we try to predict the position of a car.
@@ -63,7 +63,7 @@ where
 
 # 1D Kalman filter
 
-We learned that the **sum of two gaussians is**:
+We know that the <u>sum of two gaussians</u> is
 
 $$
 \mathcal{N}(\mu_1, \sigma_1^2) + \mathcal{N}(\mu_2, \sigma_2^2) = \\
@@ -72,7 +72,7 @@ $$
 
 We use this for predictions, as prediction are simply linear operations
 
-and the **product of 2 gaussians** is:
+and the <u>product of 2 gaussians</u> is
 
 $$
 \mathcal{N}(\mu_1, \sigma_1^2) \cdot \mathcal{N}(\mu_2, \sigma_2^2) = \\
@@ -229,7 +229,7 @@ $$
 \end{array}
 $$
 
-# n-D Kalman filter
+# nD Kalman filter
 
 The algorithm stays the same, we just add more dimensions now.
 
@@ -249,7 +249,7 @@ $$
 
 $\mathbf x,\, \mathbf P$ are the state mean and covariance. They correspond to $x$ and $\sigma^2$.
 
-$\mathbf F$ is the *state transition function*. When multiplied by $\bf x$ it computes the prior.
+$\mathbf F$ is the <u>state transition function</u>. When multiplied by $\bf x$ it computes the prior.
 
 $\mathbf Q$ is the process covariance. It corresponds to $\sigma^2_{f_x}$.
 
@@ -273,9 +273,9 @@ $$
 \end{array}
 $$
 
-$\mathbf H$ is the measurement function. We haven't seen this yet in this book and I'll explain it later. If you mentally remove $\mathbf H$ from the equations, you should be able to see these equations are similar as well.
+$\mathbf H$ is the measurement function.
 
-$\mathbf z,\, \mathbf R$ are the measurement mean and noise covariance. They correspond to $z$ and $\sigma_z^2$ in the univariate filter (I've substituted $\mu$ with $x$ for the univariate equations to make the notation as similar as possible).
+$\mathbf z,\, \mathbf R$ are the measurement mean and noise covariance. They correspond to $z$ and $\sigma_z^2$ in the univariate filter.
 
 $\mathbf y$ and $\mathbf K$ are the residual and Kalman gain.
 
@@ -340,7 +340,7 @@ $$
 
 ### Design Process Noise
 
-Random forces can influance a system, we can model this for example by adding white noise:
+Random forces can influence a system, we can model this for example by adding white noise:
 
 $$
 \mathbf{\dot x = }f(\mathbf{x}) + w
@@ -385,14 +385,14 @@ $$
 $$
 
 $$
-\mathbf R = \begin{bmatrix} \sigma_{z_1}^2 & 0 \\ 0 & \sigma_{z_2}^2 \end{bmatrix}
+\mathbf R = \begin{bmatrix} \sigma_{z_1}^2 & \text{cov}(\sigma_{z_1}^2, \sigma_{z_2}^2) \\ \text{cov}(\sigma_{z_1}^2, \sigma_{z_2}^2) & \sigma_{z_2}^2 \end{bmatrix}
 $$
 
 
 
 ## Kalman filter Equations
 
-### Predicion equations
+### Prediction equations
 
 Simply as described above.
 
@@ -445,3 +445,126 @@ $\mathbf z,\, \mathbf R$ are the measurement mean and noise covariance. They cor
 $\mathbf y$ and $\mathbf K$ are the residual and Kalman gain.
 
 Our job is to design a state ($\mathbf{x}, \mathbf{P}$), the process ($\mathbf{F}, \mathbf{Q}$), the measurement ($\mathbf{z}, \mathbf{R}$), and the measurement function $\mathbf{H}$. If the system has control inputs, such as a robot, you will also design $\mathbf{B}$ and $\mathbf{u}$.
+
+
+
+### Update equations
+
+**<u>System uncertainty</u>**
+
+$\textbf{S} = \mathbf{H\bar PH}^\mathsf T + \mathbf R$
+
+We have to work in the measurement space, therefore the *prior* must be projected into it. So $\bf S$ is the prior state, transformed into the measurement space, plus measurement noise covariance.
+
+<u>**Kalman Gain**</u>
+
+Remember: 
+
+$$
+\mu =\frac{\bar\sigma^2 \mu_z + \sigma_\mathtt{z}^2 \bar\mu} {\bar\sigma^2 + \sigma_\mathtt{z}^2}\\
+\mu = (1-K)\bar\mu + K\mu_\mathtt{z}\\
+
+K = \frac {\bar\sigma^2} {\bar\sigma^2 + \sigma_z^2}
+$$
+
+$K$ is the <u>Kalman gain</u>, a ratio of how much credence we give the prediction and measurement. 
+
+Translating it from univariate to multi variate $\bf S$ corresponds to $\bar \sigma^2 + \sigma_z^2$, therefore 
+
+$$
+\bf K = \bf{\bar P} H^\mathsf T \bf S^{-1}
+$$
+
+
+
+Since  $\textbf{S} = \mathbf{H\bar PH}^\mathsf T + \mathbf R$ we can also write it as:
+
+$$
+\bf K = \bf{\bar P} H^\mathsf T (\bf{H \bar P H^\mathsf T + R})^{-1}
+$$
+
+
+
+**<u>Residual</u>**
+
+Simply the measurement $\bf z$ minus the measurement space projected state $\bf{H\bar x}$ giving
+
+$$
+\bf{y = z - H\bar x}
+$$
+
+<u>**State update**</u>
+
+$$
+\bf{x = \bar x + Ky}
+$$
+
+More clearly shown by
+
+$$
+\begin{aligned}
+\mathbf x &= \mathbf{\bar x} + \mathbf{Ky} \\
+&= \mathbf{\bar x} +\mathbf K(\mathbf z - \mathbf{H\bar x}) \\
+&= (\mathbf I - \mathbf{KH})\mathbf{\bar x} + \mathbf{Kz}
+\end{aligned}
+$$
+
+Here you also see that we've chosen to write down $\bf \bar x$ and $\bf z$, rather than $\bf \bar \mu$ and $\mathbf \mu_z$. But of course though, when write down $\bf \bar x$ we're talking about the mean. This will be clear from the code.
+
+**<u>Covariance update</u>**
+
+$$
+\bf{P = (I-KH)\bar P}
+$$
+
+### Summary
+
+$$
+\begin{aligned}
+
+\text{Predict Step}\\
+
+\mathbf{\bar x} &= \mathbf{F x} + \mathbf{B u} \\
+
+\mathbf{\bar P} &= \mathbf{FP{F}}^\mathsf T + \mathbf Q \\
+
+\\
+
+\text{Update Step}\\
+
+\textbf{S} &= \mathbf{H\bar PH}^\mathsf T + \mathbf R \\
+
+\mathbf K &= \mathbf{\bar PH}^\mathsf T \mathbf{S}^{-1} \\
+
+\textbf{y} &= \mathbf z - \mathbf{H \bar x} \\
+
+\mathbf x &=\mathbf{\bar x} +\mathbf{K\textbf{y}} \\
+
+\mathbf P &= (\mathbf{I}-\mathbf{KH})\mathbf{\bar P}
+
+\end{aligned}
+
+$$
+
+### Paper notation
+
+$$
+\begin{aligned}
+
+\hat{\mathbf x}_{k\mid k-1} &= \mathbf F_k\hat{\mathbf x}_{k-1\mid k-1} + \mathbf B_k \mathbf u_k  \\
+
+\mathbf P_{k\mid k-1} &=  \mathbf F_k \mathbf P_{k-1\mid k-1} \mathbf F_k^\mathsf T + \mathbf Q_k \\            
+
+\tilde{\mathbf y}_k &= \mathbf z_k - \mathbf H_k\hat{\mathbf x}_{k\mid k-1}\\
+
+\mathbf{S}_k &= \mathbf H_k \mathbf P_{k\mid k-1} \mathbf H_k^\mathsf T + \mathbf R_k \\
+
+\mathbf K_k &= \mathbf P_{k\mid k-1}\mathbf H_k^\mathsf T \mathbf{S}_k^{-1}\\
+
+\hat{\mathbf x}_{k\mid k} &= \hat{\mathbf x}_{k\mid k-1} + \mathbf K_k\tilde{\mathbf y}_k\\
+
+\mathbf P_{k|k} &= (I - \mathbf K_k \mathbf H_k) \mathbf P_{k|k-1}
+
+\\\end{aligned}
+
+$$
