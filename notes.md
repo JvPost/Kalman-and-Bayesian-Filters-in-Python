@@ -96,6 +96,16 @@ $$
 
 where $\bar\mu$ and $\bar\sigma^2$ denote prior parameters and $\mu_z$ and $\sigma^2_z$ denote measurement model parameters. Remember, both the prior and measurement have noise. Then in the subsequent steps the posterior becomes the new prior. 
 
+**Likelihood**
+
+So, we get mean and covariance vectors from multiplying the prior and the likelihood.
+
+Remember, the prior is the posterior we previously calculated, and the **likelihood is the likely position given the measurement z**. In these notes I denote priors with a bar and likelihoods with the subscript $z$.
+
+This description of the system corresponds with the definition of the likelihood function. The likelihood function is the probability of the data given the model parameters. In this system the model parameters are the measurements $z$ we take, because they are a description of the reality. The data is the actual state of the system $x$.
+
+Example: given that the die rolled 6 three times, what is the likelihood that the die is fair? Or in our case: how likely are the measures in the current state $p(z | x)$. And we want to find $p(x|z) = \frac{p(z|x)p(x)}{p(z)}$.
+
 As long as everything is gaussian we can use measurements and predictions to update the Kalman filter:
 
 ```python
@@ -139,15 +149,39 @@ For each iteration of the loop we forma prior, take a measurement, form a likeli
 
 ## Kalman gain derivation
 
-<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-38-48-image.png" title="" alt="" width="443">
+$$
+\begin{aligned}
+\mu^* &= \frac{\bar \sigma^2\mu_z+\sigma_z^2\bar\mu}{\bar\sigma^2 + \sigma_z^2} \\
+&= \frac{1}{\bar\sigma^2 + \sigma_z^2} \bar\sigma^2\mu_z+ 
+\frac{1}{\bar\sigma^2 + \sigma_z^2} \sigma^2_z\bar\mu \\
+&= \frac{\bar\sigma^2}{\bar\sigma^2 + \sigma_z^2} \mu_z+ 
+\frac{\sigma^2_z}{\bar\sigma^2 + \sigma_z^2} \bar\mu \\
+&= \frac{\bar\sigma^2}{\bar\sigma^2 + \sigma_z^2} \mu_z + 
+\left(1- \frac{\bar\sigma^2}{\bar\sigma^2 + \sigma_z^2} \right) \bar\mu \\
+&= K\mu_z + (1-K)\bar\mu
+\end{aligned}
+$$
 
 where $\mu^*$ is the posterior mean and $K=\frac{\bar\sigma^2}{\bar\sigma^2 + \sigma_z^2}$ is called **Kalman gain**
 
-<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-42-00-image.png" title="" alt="" width="375">
+$$
+\begin{aligned}
+ & K \mu_z + (1-K)\bar\mu \\
+ &= K \mu_z + \bar\mu -K\bar\mu \\
+&= \bar\mu + K(\mu_z - \bar\mu)
+\end{aligned}
+$$
 
 The posterior variance ${\sigma^2}^*$ can also be defined in terms of $K$:
 
-<img src="file:///home/marco/snap/marktext/9/.config/marktext/images/2023-03-06-10-46-23-image.png" title="" alt="" width="323">
+$$
+\begin{aligned}
+{\sigma^2}^* &= \frac{\bar\sigma^2 \sigma_z^2}{\bar \sigma^2 + \sigma^2_z} \\
+&= \sigma^2_z \frac{\bar\sigma^2 }{\bar \sigma^2 + \sigma^2_z} \\
+&= \sigma^2_z K \\
+&= \bar\sigma^2 (1-K)
+\end{aligned}
+$$
 
 ## KF algorithm
 
@@ -171,12 +205,16 @@ def predict(posterior, movement):
     return gaussian(x, P)
 ```
 
-$R$ is measurement noise: $\sigma^2_z
-$
+$$
+
+
+$$
+
+$R$ is measurement noise: $\sigma^2_z$
 
 $Q$ is process noise: $\bar\sigma^2 + \sigma_z^2$
 
-$P$ is state variance: $\bar\sigma^2$
+P is state variance:$ \bar\sigma^2$
 $z$ is measurement: $z \sim \mathcal{N}(\mu_z, \sigma_z^2)$
 
 Kalman gain $K = P/(P+R)$
@@ -360,7 +398,7 @@ Here $\mathbf{u}$ is the <u>control input</u> and $\mathbf{B}$ is the <u>control
 
 Therefore, to make a prediction we have to specify
 
-$\mathbf{x, P}$: the state an covariance
+$\mathbf{x, P}$: the state mean and covariance
 
 $\mathbf{F, Q}$: the process model and noise covariance
 
@@ -387,8 +425,6 @@ $$
 $$
 \mathbf R = \begin{bmatrix} \sigma_{z_1}^2 & \text{cov}(\sigma_{z_1}^2, \sigma_{z_2}^2) \\ \text{cov}(\sigma_{z_1}^2, \sigma_{z_2}^2) & \sigma_{z_2}^2 \end{bmatrix}
 $$
-
-
 
 ## Kalman filter Equations
 
@@ -446,8 +482,6 @@ $\mathbf y$ and $\mathbf K$ are the residual and Kalman gain.
 
 Our job is to design a state ($\mathbf{x}, \mathbf{P}$), the process ($\mathbf{F}, \mathbf{Q}$), the measurement ($\mathbf{z}, \mathbf{R}$), and the measurement function $\mathbf{H}$. If the system has control inputs, such as a robot, you will also design $\mathbf{B}$ and $\mathbf{u}$.
 
-
-
 ### Update equations
 
 **<u>System uncertainty</u>**
@@ -475,15 +509,11 @@ $$
 \bf K = \bf{\bar P} H^\mathsf T \bf S^{-1}
 $$
 
-
-
 Since  $\textbf{S} = \mathbf{H\bar PH}^\mathsf T + \mathbf R$ we can also write it as:
 
 $$
 \bf K = \bf{\bar P} H^\mathsf T (\bf{H \bar P H^\mathsf T + R})^{-1}
 $$
-
-
 
 **<u>Residual</u>**
 
@@ -571,42 +601,28 @@ $$
 
 ## Filter initialization
 
+# Designing Kalman Filters
 
+Order of design:
 
+1. State $\bf x$ (one dimension for every (hidden) variable)
 
+2. State transition matrix $\bf F$
 
+3. Process Noise Matrix $\bf Q$
 
+4. Control function $\bf B$
 
+5. Measurement function $\bf H$
 
+6. Measurement noise $\bf R$
 
+7. Initial conditions $\mathbf{x}_0$ and $\mathbf{P}_0$
 
+## n-order kalman filters
 
+You can decide incorporate different orders of derivation or polynomial into your state model e.g. $\mathbf{x} = [x, \dot x, \ddot x]$, where $x$ is position, $\dot x$ is velocity and $\ddot x$ is accelaration. Let's say we have we're tracking a filtering an object that has a constant speed. You might conjecture that incorporating $\ddot x$ would be good, because more information is always better and if $\ddot x$ is 0 anyways, it doesn't matter. However, this is not true in this case, because the accelaration sensor also has noise, which can be wrongly interpreted by the filter. Additionally, hsigh noise in position and velocity may be interpreted as accelaration. But we said $\dot x$ was constant, and therefore $\ddot x = 0$. Therefore, setting the filter order as high as possible it not always the best choice. Sometimes we need to throw away information.
 
+For example, consider a system of 2 points. For 0th or 1st polyonomials the optimal approximation is easy: it's the straight light that minimizes the error. However, increase the order and ther are an infinite amount of answers that minimize the error. Therefore, you need a filter whose order matches the system's order. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+With that said, a lower oder filter can track a higher order process so long as you add enough process noise and you keep the descretization period small (100 samples a second are useually locally linear).
