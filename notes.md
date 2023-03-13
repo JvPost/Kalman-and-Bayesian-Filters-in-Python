@@ -104,7 +104,13 @@ Remember, the prior is the posterior we previously calculated, and the **likelih
 
 This description of the system corresponds with the definition of the likelihood function. The likelihood function is the probability of the data given the model parameters. In this system the model parameters are the measurements $z$ we take, because they are a description of the reality. The data is the actual state of the system $x$.
 
-Example: given that the die rolled 6 three times, what is the likelihood that the die is fair? Or in our case: how likely are the measures in the current state $p(z | x)$. And we want to find $p(x|z) = \frac{p(z|x)p(x)}{p(z)}$.
+Example: given that the die rolled 6 three times, what is the likelihood that the die is fair? Or in our case: how likely are the measures in the current state $p(z | x)$. And we want to find 
+
+$$
+p(x|z) = \frac{p(z|x)p(x)}{p(z)}
+$$
+
+
 
 As long as everything is gaussian we can use measurements and predictions to update the Kalman filter:
 
@@ -206,8 +212,6 @@ def predict(posterior, movement):
 ```
 
 $$
-
-
 $$
 
 $R$ is measurement noise: $\sigma^2_z$
@@ -242,6 +246,7 @@ Kalman gain $K = P/(P+R)$
 **<u>Predict</u>**
 
 $$
+
 \begin{array}{|l|l|l|}
 \hline
 \text{Equation} & \text{Implementation} & \text{Kalman Form}\\
@@ -626,3 +631,14 @@ You can decide incorporate different orders of derivation or polynomial into you
 For example, consider a system of 2 points. For 0th or 1st polyonomials the optimal approximation is easy: it's the straight light that minimizes the error. However, increase the order and ther are an infinite amount of answers that minimize the error. Therefore, you need a filter whose order matches the system's order. 
 
 With that said, a lower oder filter can track a higher order process so long as you add enough process noise and you keep the descretization period small (100 samples a second are useually locally linear).
+
+# Unscented Kalman Filters
+
+**Sigma points**: data points sampled from a normal transformed by some non-linear function s.t.:
+
+$$
+\{\text{x}\} \sim \mathcal N(\mu, \sigma^2)\\
+y_i = f(x_i)
+$$
+
+where $f()$ is a non-linear function and $y_i$ is a sigma point.
