@@ -211,8 +211,7 @@ def predict(posterior, movement):
     return gaussian(x, P)
 ```
 
-$$
-$$
+## Equations
 
 $R$ is measurement noise: $\sigma^2_z$
 
@@ -241,21 +240,14 @@ Kalman gain $K = P/(P+R)$
 4. Set state between the prediction and measurement based on scaling factor
 5. Update belief in the state based on how certain we are in the measurement.
 
-## Equations
-
 **<u>Predict</u>**
 
 $$
-
-\begin{array}{|l|l|l|}
-\hline
-\text{Equation} & \text{Implementation} & \text{Kalman Form}\\
-\hline
- \bar x = x + f_x & \bar\mu = \mu + \mu_{f_x} & \bar x = x + dx\\
-& \bar\sigma^2 = \sigma^2 + \sigma_{f_x}^2 & \bar P = P + Q\\
-\hline
-\end{array}
+\begin{array}{|l|l|l|}\hline\text{Equation} & \text{Implementation} & \text{Kalman Form}\\\hline \bar x = x + f_x & \bar\mu = \mu + \mu_{f_x} & \bar x = x + dx\\& \bar\sigma^2 = \sigma^2 + \sigma_{f_x}^2 & \bar P = P + Q\\\hline\end{array}
 $$
+
+
+
 
 **<u>Update</u>**
 
