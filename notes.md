@@ -58,6 +58,7 @@ where
 
 - $\text{residual}  = \text{measurement} - \text{prediction}$
 - $\text{prediction} = \text{last estimate} + \text{gain} \cdot dt$
+- $\text{gain}$ desribes how to system changes over time, comparable to the derivative in the euler method of an ODE.
 - $g$ describes how sure we are about the measurement, i.e. how much we want to fit the measurement error (residual), or how accurate we predict the measurement to be. The more sure we are about the measurement ($\text{residual} \approx 0$), the higher $g $should be.
 - $h$ decribes the prediction of how fast the system exchanges over time.
 
@@ -217,10 +218,10 @@ $R$ is measurement noise: $\sigma^2_z$
 
 $Q$ is process noise: $\bar\sigma^2 + \sigma_z^2$
 
-P is state variance:$ \bar\sigma^2$
+P is state variance: $\bar\sigma^2$
 $z$ is measurement: $z \sim \mathcal{N}(\mu_z, \sigma_z^2)$
 
-Kalman gain $K = P/(P+R)$
+Kalman gain $K = P/(P+R)$  
 
 **Initialization**
 
@@ -245,7 +246,6 @@ Kalman gain $K = P/(P+R)$
 $$
 \begin{array}{|l|l|l|}\hline\text{Equation} & \text{Implementation} & \text{Kalman Form}\\\hline \bar x = x + f_x & \bar\mu = \mu + \mu_{f_x} & \bar x = x + dx\\& \bar\sigma^2 = \sigma^2 + \sigma_{f_x}^2 & \bar P = P + Q\\\hline\end{array}
 $$
-
 
 
 
@@ -447,7 +447,7 @@ $$
 
 $\mathbf x$,  $\mathbf P$ are the state mean and covariance. They correspond to $x$ and $\sigma^2$.
 
-$\mathbf F$ is the *state transition function*. When multiplied by $\mathbf x$ it computes the prior.
+$\mathbf F$ is the *state transition function*. When multiplied by $\mathbf x$ it computes the prior value.
 
 $\mathbf Q$ is the process covariance. It corresponds to $\sigma^2_{f_x}$.
 
